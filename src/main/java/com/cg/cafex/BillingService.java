@@ -10,14 +10,12 @@ public class BillingService {
 
     private static BillingService instance;
     private static Menu menu = null;
-
-    private BillingService(Menu menu){
-        BillingService.menu = menu;
-    }
+    private BillingService(){}
 
     public static synchronized BillingService getInstance(Menu menu){
         if(instance == null){
-            instance = new BillingService(menu);
+            instance = new BillingService();
+            BillingService.menu = menu;
         }
         return instance;
     }
@@ -41,11 +39,14 @@ public class BillingService {
     }
 
     private BigDecimal sumItems(List<Item> listOfItems){
+        ServiceChargeCalculator serviceChargeCalculator = new ServiceChargeCalculator();
         BigDecimal total = new BigDecimal(0);
         for (Item items : listOfItems){
             total = total.add(items.getPrice());
         }
-        return total;
+        BigDecimal totalIncService = total.add(serviceChargeCalculator.calculate(total, listOfItems.toArray(new Item[listOfItems.size()])));
+
+        return totalIncService.setScale(2, BigDecimal.ROUND_HALF_UP);
     }
 
 }
